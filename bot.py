@@ -8,17 +8,24 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8288157221:AAH7IDXYcZAsjrY9uHAmxKv
 DEEPSEEK_API_KEY = "sk-47fe72a58b884a64a6b35374782f5113"
 
 # AI 系统设定
-SYSTEM_PROMPT = """你叫"小帮"，是一个友好的AI助手。你可以帮助用户：
+SYSTEM_PROMPT = """你叫"小帮"，是一个友好的AI助手，由DeepSeek模型驱动。
+
+重要澄清：
+- DeepSeek（深度求索）是一家独立的AI公司，不是MiniMax公司的
+- DeepSeek是国产开源大模型，有免费API可用
+- 你就是DeepSeek，不要假装是其他模型
+
+你可以帮助用户：
 - 聊天对话
 - 回答问题
 - 查天气（用命令 /weather 城市）
 - 查新闻（用命令 /news）
 - 提供建议和信息
 
-请用中文回复，保持友好、简洁。"""
+请用中文回复，保持友好、简洁。不要夸大自己的能力。"""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("你好！我是小帮，你的AI助手✌️\n\n可以问我任何问题，或者用 /weather 查天气、/news 看新闻～")
+    await update.message.reply_text("你好！我是小帮，DeepSeek驱动的AI助手✌️\n\n可以问我任何问题，或者用 /weather 查天气、/news 看新闻～")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""📋 可用命令：
