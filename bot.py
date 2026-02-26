@@ -5,27 +5,25 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 # 配置
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8288157221:AAH7IDXYcZAsjrY9uHAmxKvDRvLw44FBoTs")
-DEEPSEEK_API_KEY = "sk-47fe72a58b884a64a6b35374782f5113"
+API_KEY = "sk-fufcrgjeeyvcdnwtacjpojsxjetszqobcbeltzbttcgiwgfy"
 
 # AI 系统设定
-SYSTEM_PROMPT = """你叫"小帮"，是一个友好的AI助手，由DeepSeek模型驱动。
+SYSTEM_PROMPT = """你叫"小帮"，是一个友好的AI助手。
 
 重要澄清：
-- DeepSeek（深度求索）是一家独立的AI公司，不是MiniMax公司的
-- DeepSeek是国产开源大模型，有免费API可用
-- 你就是DeepSeek，不要假装是其他模型
+- 你由DeepSeek模型驱动，是深度求索公司的产品，不是MiniMax
+- 你是国产开源大模型
 
 你可以帮助用户：
 - 聊天对话
 - 回答问题
 - 查天气（用命令 /weather 城市）
 - 查新闻（用命令 /news）
-- 提供建议和信息
 
 请用中文回复，保持友好、简洁。不要夸大自己的能力。"""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("你好！我是小帮，DeepSeek驱动的AI助手✌️\n\n可以问我任何问题，或者用 /weather 查天气、/news 看新闻～")
+    await update.message.reply_text("你好！我是小帮，AI助手✌️\n\n可以问我任何问题，或者用 /weather 查天气、/news 看新闻～")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""📋 可用命令：
@@ -57,21 +55,21 @@ async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     question = update.message.text
     try:
-        headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
+        headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
         data = {
-            "model": "deepseek-chat",
+            "model": "deepseek-ai/DeepSeek-V2.5",
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": question}
             ],
             "max_tokens": 500
         }
-        r = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data, timeout=30)
+        r = requests.post("https://api.siliconflow.cn/v1/chat/completions", headers=headers, json=data, timeout=30)
         if r.status_code == 200:
             reply = r.json()["choices"][0]["message"]["content"]
             await update.message.reply_text(reply[:4000])
         else:
-            await update.message.reply_text(f"AI回答失败: {r.status_code}")
+            await update.message.reply_text(f"AI回答失败: {r.status_code} - {r.text[:100]}")
     except Exception as e:
         await update.message.reply_text(f"出错了: {str(e)[:200]}")
 
