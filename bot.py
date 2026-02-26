@@ -7,17 +7,27 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8288157221:AAH7IDXYcZAsjrY9uHAmxKvDRvLw44FBoTs")
 DEEPSEEK_API_KEY = "sk-47fe72a58b884a64a6b35374782f5113"
 
+# AI 系统设定
+SYSTEM_PROMPT = """你叫"小帮"，是一个友好的AI助手。你可以帮助用户：
+- 聊天对话
+- 回答问题
+- 查天气（用命令 /weather 城市）
+- 查新闻（用命令 /news）
+- 提供建议和信息
+
+请用中文回复，保持友好、简洁。"""
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("你好！我是智能助手小帮✌️\n\n可以：\n- 聊天问答\n- 查天气 城市名\n- 查新闻\n\n随便问我～")
+    await update.message.reply_text("你好！我是小帮，你的AI助手✌️\n\n可以问我任何问题，或者用 /weather 查天气、/news 看新闻～")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("""可用命令：
+    await update.message.reply_text("""📋 可用命令：
 /start - 开始
 /help - 帮助
 /weather 城市 - 查天气
 /news - 最新新闻
 
-也可以直接发消息问我！""")
+直接发消息问我也可以！""")
 
 async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = " ".join(context.args) if context.args else "广州"
@@ -43,7 +53,10 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
         data = {
             "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": question}],
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": question}
+            ],
             "max_tokens": 500
         }
         r = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data, timeout=30)
@@ -51,7 +64,7 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply = r.json()["choices"][0]["message"]["content"]
             await update.message.reply_text(reply[:4000])
         else:
-            await update.message.reply_text(f"AI回答失败: {r.status_code} - 请检查API Key")
+            await update.message.reply_text(f"AI回答失败: {r.status_code}")
     except Exception as e:
         await update.message.reply_text(f"出错了: {str(e)[:200]}")
 
