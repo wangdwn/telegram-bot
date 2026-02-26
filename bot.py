@@ -5,10 +5,10 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 # 配置
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8288157221:AAH7IDXYcZAsjrY9uHAmxKvDRvLw44FBoTs")
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-xxx")  # 你的DeepSeek API Key
+DEEPSEEK_API_KEY = "sk-47fe72a58b884a64a6b35374782f5113"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("你好！我是智能助手小帮✌️\n\n可以：\n- 聊天问答\n- 查天气 城市名\n- 查新闻\n- 搜索 关键词\n\n随便问我～")
+    await update.message.reply_text("你好！我是智能助手小帮✌️\n\n可以：\n- 聊天问答\n- 查天气 城市名\n- 查新闻\n\n随便问我～")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("""可用命令：
@@ -16,7 +16,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /help - 帮助
 /weather 城市 - 查天气
 /news - 最新新闻
-/ai 你的问题 - AI问答
 
 也可以直接发消息问我！""")
 
@@ -31,7 +30,6 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def news(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         r = requests.get("https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-Hans", timeout=10)
-        # 简单处理，取前5条标题
         import re
         titles = re.findall(r'<title><!\[CDATA\[(.*?)\]\]></title>', r.text)[:5]
         msg = "📰 今日新闻：\n\n" + "\n\n".join([f"{i+1}. {t}" for i,t in enumerate(titles)])
@@ -53,12 +51,11 @@ async def ai_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply = r.json()["choices"][0]["message"]["content"]
             await update.message.reply_text(reply[:4000])
         else:
-            await update.message.reply_text(f"AI回答失败: {r.status_code}")
+            await update.message.reply_text(f"AI回答失败: {r.status_code} - 请检查API Key")
     except Exception as e:
         await update.message.reply_text(f"出错了: {str(e)[:200]}")
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # 默认走AI问答
     await ai_chat(update, context)
 
 def main():
@@ -68,7 +65,6 @@ def main():
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("weather", weather))
     app.add_handler(CommandHandler("news", news))
-    app.add_handler(CommandHandler("ai", ai_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     
     print("🤖 Bot started!")
